@@ -12,8 +12,6 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
 
-
-
 app.get('/', function(req, res){
     res.send('what???', 404);
 });
