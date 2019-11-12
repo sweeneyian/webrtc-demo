@@ -1,19 +1,22 @@
 
 'use strict';
 
-
-const os = require('os');
-const express = require('express')
-const app = express()
-const server = require('http').Server(app)
-const io = module.exports.io = require('socket.io')(server)
 const PORT = process.env.PORT || 8080
+var express=require('express');
+var app = express();
+var path=require('path');
+var server = require('http').createServer(app);
+var io=require('socket.io')(server);
+//Initialize application with route
+app.use(express.static('public/'));
+// app.use('/public',express.static('public/stack'));
 
-app.use(express.static('./'))
 
-server.listen(PORT, ()=>{
-    console.log('Connected to port: ' + PORT)
-})
+
+
+app.get('/', function(req, res){
+    res.send('what???', 404);
+});
 
 io.sockets.on('connection', function(socket) {
 
@@ -69,3 +72,7 @@ io.sockets.on('connection', function(socket) {
     });
   
   });
+
+  server.listen(PORT, ()=>{
+    console.log('Connected to port: ' + PORT)
+})
