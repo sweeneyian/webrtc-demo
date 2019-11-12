@@ -8,6 +8,10 @@ const http = require('http')
 var app = express();
 app.set('port', PORT);
 app.use(express.static('public/'))
+app.use(express.static('/node_modules/'));
+app.use(express.static('node_modules/'));
+app.use(express.static('/node_modules/lib'));
+app.use(express.static('node_modules/'));
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
