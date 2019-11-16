@@ -2,6 +2,31 @@
 
 console.log('Main')
 
+// telephone variables 
+
+const startButton = document.getElementById('startButton');
+const callButton = document.getElementById('callButton');
+const upgradeButton = document.getElementById('upgradeButton');
+const hangupButton = document.getElementById('hangupButton');
+
+var roomInput = document.getElementById('roomInput');
+var roomDiv = document.getElementById('roomDiv');
+var roomName = document.getElementById('roomName');
+
+callButton.disabled = true;
+hangupButton.disabled = true;
+upgradeButton.disabled = true;
+startButton.onclick = start;
+callButton.onclick = call;
+upgradeButton.onclick = upgrade;
+hangupButton.onclick = hangup;
+
+let startTime;
+const localVideo = document.getElementById('localVideo');
+const remoteVideo = document.getElementById('remoteVideo');
+
+// Peer variables
+
 var isChannelReady = false;
 var isInitiator = false;
 var isStarted = false;
@@ -22,17 +47,102 @@ var sdpConstraints = {
   offerToReceiveVideo: true
 };
 
+//////// telephone functions
+
+function start() {
+  console.log('Requesting local stream');
+  startButton.disabled = true;
+  navigator.mediaDevices
+    .getUserMedia({
+      audio: true,
+      video: false
+    })
+    .then(gotStream)
+    .catch(e => alert(`getUserMedia() error: ${e.name}`));
+}
+
+function call() {
+  callButton.disabled = true;
+  upgradeButton.disabled = false;
+  hangupButton.disabled = false;
+  console.log('Starting call');
+  startTime = window.performance.now();
+  const audioTracks = localStream.getAudioTracks();
+  if (audioTracks.length > 0) {
+    console.log(`Using audio device: ${audioTracks[0].label}`);
+  }
+  const servers = null;
+  pc1 = new RTCPeerConnection(servers);
+  console.log('Created local peer connection object pc1');
+  pc1.onicecandidate = e => onIceCandidate(pc1, e);
+  pc2 = new RTCPeerConnection(servers);
+  console.log('Created remote peer connection object pc2');
+  pc2.onicecandidate = e => onIceCandidate(pc2, e);
+  pc1.oniceconnectionstatechange = e => onIceStateChange(pc1, e);
+  pc2.oniceconnectionstatechange = e => onIceStateChange(pc2, e);
+  pc2.ontrack = gotRemoteStream;
+
+  localStream.getTracks().forEach(track => pc1.addTrack(track, localStream));
+  console.log('Added local stream to pc1');
+
+  console.log('pc1 createOffer start');
+  pc1.createOffer(offerOptions).then(onCreateOfferSuccess, onCreateSessionDescriptionError);
+}
+
+function upgrade() {
+  upgradeButton.disabled = true;
+  navigator.mediaDevices
+    .getUserMedia({video: true})
+    .then(stream => {
+      const videoTracks = stream.getVideoTracks();
+      if (videoTracks.length > 0) {
+        console.log(`Using video device: ${videoTracks[0].label}`);
+      }
+      localStream.addTrack(videoTracks[0]);
+      localVideo.srcObject = null;
+      localVideo.srcObject = localStream;
+      pc1.addTrack(videoTracks[0], localStream);
+      return pc1.createOffer();
+    })
+    .then(offer => pc1.setLocalDescription(offer))
+    .then(() => pc2.setRemoteDescription(pc1.localDescription))
+    .then(() => pc2.createAnswer())
+    .then(answer => pc2.setLocalDescription(answer))
+    .then(() => pc1.setRemoteDescription(pc2.localDescription));
+}
+
+function hangup() {
+  console.log('Ending call');
+  pc1.close();
+  pc2.close();
+  pc1 = null;
+  pc2 = null;
+
+  const videoTracks = localStream.getVideoTracks();
+  videoTracks.forEach(videoTrack => {
+    videoTrack.stop();
+    localStream.removeTrack(videoTrack);
+  });
+  localVideo.srcObject = null;
+  localVideo.srcObject = localStream;
+
+  hangupButton.disabled = true;
+  callButton.disabled = false;
+}
 /////////////////////////////////////////////
-
-var room = 'foo';
-// Could prompt for room name:
-// room = prompt('Enter room name:');
-
 var socket = io.connect();
+var room;
+function joinRoom(){ 
 
-if (room !== '') {
-  socket.emit('create or join', room);
-  console.log('Attempted to create or  join room', room);
+  room = roomName.value;
+  console.log("Joining Room: " + room);
+  roomInput.style.display = "none";
+  roomDiv.innerHTML = "Welcome to " + room + " room" +"<br />";
+  
+  if (room !== '') {
+    socket.emit('create or join', room);
+    console.log('Attempted to create or  join room', room);
+  }
 }
 
 socket.on('created', function(room) {
@@ -92,8 +202,6 @@ socket.on('log', function(array) {
 
   ////////////////////////////////////////////////////
 
-  var localVideo = document.querySelector('#localVideo');
-  var remoteVideo = document.querySelector('#remoteVideo');
 
   navigator.mediaDevices.getUserMedia({
     audio: false,
@@ -120,11 +228,12 @@ socket.on('log', function(array) {
 
   console.log('Getting user media with constraints', constraints);
 
-  if (location.hostname !== 'localhost') {
-    requestTurn(
-      'https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913'
-    );
-  }
+  // Lost with regards to ICE / TURN / STUN
+  // if (location.hostname !== 'localhost') {
+  //   requestTurn(
+  //     'https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913'
+  //   );
+  // }
 
   function maybeStart() {
     console.log('>>>>>>> maybeStart() ', isStarted, localStream, isChannelReady);
@@ -201,34 +310,10 @@ socket.on('log', function(array) {
     trace('Failed to create session description: ' + error.toString());
   }
 
-  function requestTurn(turnURL) {
-    var turnExists = false;
-    for (var i in pcConfig.iceServers) {
-      if (pcConfig.iceServers[i].urls.substr(0, 5) === 'turn:') {
-        turnExists = true;
-        turnReady = true;
-        break;
-      }
-    }
-    if (!turnExists) {
-      console.log('Getting TURN server from ', turnURL);
-      // No TURN server. Get one from computeengineondemand.appspot.com:
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          var turnServer = JSON.parse(xhr.responseText);
-          console.log('Got TURN server: ', turnServer);
-          pcConfig.iceServers.push({
-            'urls': 'turn:' + turnServer.username + '@' + turnServer.turn,
-            'credential': turnServer.password
-          });
-          turnReady = true;
-        }
-      };
-      xhr.open('GET', turnURL, true);
-      xhr.send();
-    }
-  }
+  // Lost with regards to ICE / TURN / STUN
+  // function requestTurn(turnURL) {
+  //  
+  // }
 
   function handleRemoteStreamAdded(event) {
     console.log('Remote stream added.');
