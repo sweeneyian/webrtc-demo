@@ -1,5 +1,7 @@
 
 'use strict';
+console.log('server')
+
 
 const PORT = process.env.PORT || 8080
 const os = require('os');
@@ -27,6 +29,7 @@ io.sockets.on('connection', function(socket) {
       var array = ['Message from server:'];
       array.push.apply(array, arguments);
       socket.emit('log', array);
+      console.log(array);
     }
   
     socket.on('message', function(message) {

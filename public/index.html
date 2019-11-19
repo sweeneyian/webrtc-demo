@@ -22,21 +22,50 @@
     <button onclick="joinRoom()">Join</button>
   </div>
 
-  <div id="videos">
-    <video id="localVideo" autoplay muted playsinline></video>
-    <video id="remoteVideo" autoplay playsinline></video>
+<div class="grid-container">
+  <div class="item1">
+    <video id="localVideo" autoplay playsinline muted style="display: none;"></video>
+  </div>
+  <div class="item2">
+    <video id="remoteVideo" autoplay playsinline muted style="display: none;"></video>
+  </div>
+  <div class="item3">
+    <canvas id="localAudio"></canvas>
+  </div>
+  <div class="item4" >
+    <canvas id="remoteAudio"></canvas>
+  </div>  
+</div>
+    
+
+  
+
+  <div>
+    <button id="callButton" style="display: none;">Call</button>
+    <button id="upgradeButton" style="display: none;">Turn on video</button>
+    <button id="hangupButton" style="display: none;">Hang Up</button>
   </div>
 
-      <div>
-        <button id="startButton">Start</button>
-        <button id="callButton">Call</button>
-        <button id="upgradeButton">Turn on video</button>
-        <button id="hangupButton">Hang Up</button>
+      <div id="sendReceive">
+        <div id="send">
+            <h2>Send</h2>
+            <textarea id="dataChannelSend" disabled
+                      placeholder="Press Start, enter some text, then press Send."></textarea>
+        </div>
+        <div id="receive">
+            <h2>Receive</h2>
+            <textarea id="dataChannelReceive" disabled></textarea>
+        </div>
+    </div>
+
+    <div id="buttons">
+        <button id="sendButton" disabled>Send</button>
     </div>
 
   <!-- This file is automatically added/served when running "node index.js". -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="/js/third_party/streamvisualizer.js"></script>
   <script src="/js/main.js"></script>
 
 
