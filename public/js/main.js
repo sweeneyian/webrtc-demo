@@ -323,6 +323,7 @@ function gotRemoteStream(e) {
 function handleRemoteStreamAdded(event) {
   console.log('Remote stream added.');
   remoteStream = event.stream;
+  sendReceive.style.display = '';
   remoteVideo.style.display = '';
   remoteAudio.style.display = '';
   remoteVideo.srcObject = remoteStream;
