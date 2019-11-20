@@ -24,16 +24,16 @@
 
 <div class="grid-container">
   <div class="item1">
-    <video id="localVideo" autoplay playsinline muted style="display: none;"></video>
+    <video id="localVideo" autoplay playsinline style="display: none;"></video>
   </div>
   <div class="item2">
-    <video id="remoteVideo" autoplay playsinline muted style="display: none;"></video>
+    <video id="remoteVideo" autoplay playsinline style="display: none;"></video>
   </div>
   <div class="item3">
-    <canvas id="localAudio"></canvas>
+    <canvas id="localAudio" style="display: none;"></canvas>
   </div>
   <div class="item4" >
-    <canvas id="remoteAudio"></canvas>
+    <canvas id="remoteAudio" style="display: none;"></canvas>
   </div>  
 </div>
     
@@ -46,20 +46,20 @@
     <button id="hangupButton" style="display: none;">Hang Up</button>
   </div>
 
-      <div id="sendReceive">
+      <div id="sendReceive" style="display: none;">
         <div id="send">
             <h2>Send</h2>
             <textarea id="dataChannelSend" disabled
-                      placeholder="Press Start, enter some text, then press Send."></textarea>
+                      placeholder="Press Start, enter some text, then press Send." ></textarea>
         </div>
         <div id="receive">
             <h2>Receive</h2>
-            <textarea id="dataChannelReceive" disabled></textarea>
+            <textarea id="dataChannelReceive" disabled ></textarea>
         </div>
     </div>
 
     <div id="buttons">
-        <button id="sendButton" disabled>Send</button>
+        <button id="sendButton" disabled style="display: none;">Send</button>
     </div>
 
   <!-- This file is automatically added/served when running "node index.js". -->
