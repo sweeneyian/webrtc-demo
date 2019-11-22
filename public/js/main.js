@@ -227,7 +227,6 @@ function maybeStart() {
   if (!isStarted && typeof localStream !== 'undefined' && isChannelReady) {
     console.log('>>>>>> creating peer connection');
     createPeerConnection();
-    //pc.addStream(localStream);
     localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
     isStarted = true;
     if (isInitiator) {
@@ -246,9 +245,8 @@ function createPeerConnection() {
   try {
     pc = new RTCPeerConnection(null);
     pc.onicecandidate = handleIceCandidate;
-    pc.onaddstream = handleRemoteStreamAdded;
     pc.ontrack = gotRemoteStream;
-    pc.onremovestream = handleRemoteStreamRemoved;
+    pc.onremovetrack = handleRemoteStreamRemoved;
     console.log('Created RTCPeerConnnection');
     
     sendChannel = pc.createDataChannel('sendDataChannel');
@@ -312,22 +310,21 @@ function onCreateSessionDescriptionError(error) {
 
 
 function gotRemoteStream(e) {
+  console.log('received remote stream');
+  remoteStream = e.stream;
+  sendReceive.style.display = '';
+  remoteVideo.style.display = '';
+  remoteAudio.style.display = '';
+
   if (remoteVideo.srcObject !== e.streams[0]) {
     remoteVideo.srcObject = e.streams[0];
-    console.log('received remote stream');
+    
     const streamVisualizer = new StreamVisualizer(e.streams[0], remoteAudio);
     streamVisualizer.start();
   }
 }
 
-function handleRemoteStreamAdded(event) {
-  console.log('Remote stream added.');
-  remoteStream = event.stream;
-  sendReceive.style.display = '';
-  remoteVideo.style.display = '';
-  remoteAudio.style.display = '';
-  remoteVideo.srcObject = remoteStream;
-}
+
 
 function handleRemoteStreamRemoved(event) {
   remoteVideo.style.display = 'none';
@@ -394,12 +391,3 @@ function onReceiveChannelStateChange() {
   console.log(`Receive channel state is: ${readyState}`);
 }
 
-function onIceCandidate(event) {
-  localConnection
-    .addIceCandidate(event.candidate)
-    .then(
-      () => onAddIceCandidateSuccess(localConnection),
-      err => onAddIceCandidateError(localConnection, err)
-    );
-  console.log(`${localConnection} ICE candidate: ${event.candidate ? event.candidate.candidate : '(null)'}`);
-}
