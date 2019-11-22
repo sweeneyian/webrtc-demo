@@ -20,7 +20,7 @@ hangupButton.onclick = hangup;
 let startTime;
 //const localVideo = document.getElementById('localVideo');
 const localAudio = document.getElementById('localAudio');
-//const remoteVideo = document.getElementById('remoteVideo');
+const remoteVideo = document.getElementById('remoteVideo');
 const remoteAudio = document.getElementById('remoteAudio');
 const sendReceive = document.getElementById('sendReceive');
 
@@ -46,20 +46,20 @@ sendButton.onclick = sendData;
 
 //////// Audio Spectrogram Event Handling
 
-// remoteVideo.addEventListener('loadedmetadata', () => {
-//   return console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
-// });
+remoteVideo.addEventListener('loadedmetadata', () => {
+  return console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
+});
 
-// remoteVideo.addEventListener('resize', () => {
-//   console.log(`Remote video size changed to ${remoteVideo.videoWidth}x${remoteVideo.videoHeight}`);
-//   // We'll use the first onsize callback as an indication that video has started
-//   // playing out.
-//   if (startTime) {
-//     const elapsedTime = window.performance.now() - startTime;
-//     console.log(`Setup time: ${elapsedTime.toFixed(3)}ms`);
-//     startTime = null;
-//   }
-// });
+remoteVideo.addEventListener('resize', () => {
+  console.log(`Remote video size changed to ${remoteVideo.videoWidth}x${remoteVideo.videoHeight}`);
+  // We'll use the first onsize callback as an indication that video has started
+  // playing out.
+  if (startTime) {
+    const elapsedTime = window.performance.now() - startTime;
+    console.log(`Setup time: ${elapsedTime.toFixed(3)}ms`);
+    startTime = null;
+  }
+});
 
 // localVideo.addEventListener('loadedmetadata', () => {
 //   return console.log(`localVideo  videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
@@ -220,6 +220,23 @@ function gotStream(stream) {
   }
 }
 
+function gotRemoteStream(e) {
+  console.log('received remote stream');
+  remoteStream = e;
+  sendReceive.style.display = '';
+  //remoteVideo.style.display = '';
+  remoteAudio.style.display = '';
+
+  if (remoteVideo.srcObject !== e.streams[0]) {
+    remoteVideo.srcObject = e.streams[0];
+    
+    const streamVisualizer = new StreamVisualizer(e.streams[0], remoteAudio);
+    streamVisualizer.start();
+
+  }
+}
+
+
 function maybeStart() {
   console.log('>>>>>>> maybeStart() ', isStarted, localStream, isChannelReady);
   if (!isStarted && typeof localStream !== 'undefined' && isChannelReady) {
@@ -304,21 +321,7 @@ function onCreateSessionDescriptionError(error) {
 }
 
 
-function gotRemoteStream(e) {
-  console.log('received remote stream');
-  remoteStream = e;
-  sendReceive.style.display = '';
-  //remoteVideo.style.display = '';
-  remoteAudio.style.display = '';
 
-  //if (remoteVideo.srcObject !== e.streams[0]) {
-  //  remoteVideo.srcObject = e.streams[0];
-    
-  const streamVisualizer = new StreamVisualizer(e.streams[0], remoteAudio);
-  streamVisualizer.start();
-
-  //}
-}
 
 
 
