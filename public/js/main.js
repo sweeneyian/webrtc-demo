@@ -3,7 +3,7 @@
 // telephone variables
 
 const callButton = document.getElementById('callButton');
-const upgradeButton = document.getElementById('upgradeButton');
+//const upgradeButton = document.getElementById('upgradeButton');
 const hangupButton = document.getElementById('hangupButton');
 
 var roomInput = document.getElementById('roomInput');
@@ -12,15 +12,15 @@ var roomName = document.getElementById('roomName');
 
 callButton.disabled = true;
 hangupButton.disabled = true;
-upgradeButton.disabled = true;
+//upgradeButton.disabled = true;
 callButton.onclick = call;
-upgradeButton.onclick = upgrade;
+//upgradeButton.onclick = upgrade;
 hangupButton.onclick = hangup;
 
 let startTime;
-const localVideo = document.getElementById('localVideo');
+//const localVideo = document.getElementById('localVideo');
 const localAudio = document.getElementById('localAudio');
-const remoteVideo = document.getElementById('remoteVideo');
+//const remoteVideo = document.getElementById('remoteVideo');
 const remoteAudio = document.getElementById('remoteAudio');
 const sendReceive = document.getElementById('sendReceive');
 
@@ -44,39 +44,37 @@ const sendButton = document.querySelector('button#sendButton');
 sendButton.onclick = sendData;
 
 
-
-
 //////// Audio Spectrogram Event Handling
 
-remoteVideo.addEventListener('loadedmetadata', () => {
-  return console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
-});
+// remoteVideo.addEventListener('loadedmetadata', () => {
+//   return console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
+// });
 
-remoteVideo.addEventListener('resize', () => {
-  console.log(`Remote video size changed to ${remoteVideo.videoWidth}x${remoteVideo.videoHeight}`);
-  // We'll use the first onsize callback as an indication that video has started
-  // playing out.
-  if (startTime) {
-    const elapsedTime = window.performance.now() - startTime;
-    console.log(`Setup time: ${elapsedTime.toFixed(3)}ms`);
-    startTime = null;
-  }
-});
+// remoteVideo.addEventListener('resize', () => {
+//   console.log(`Remote video size changed to ${remoteVideo.videoWidth}x${remoteVideo.videoHeight}`);
+//   // We'll use the first onsize callback as an indication that video has started
+//   // playing out.
+//   if (startTime) {
+//     const elapsedTime = window.performance.now() - startTime;
+//     console.log(`Setup time: ${elapsedTime.toFixed(3)}ms`);
+//     startTime = null;
+//   }
+// });
 
-localVideo.addEventListener('loadedmetadata', () => {
-  return console.log(`localVideo  videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
-});
+// localVideo.addEventListener('loadedmetadata', () => {
+//   return console.log(`localVideo  videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
+// });
 
-localVideo.addEventListener('resize', () => {
-  console.log(`localVideo size changed to ${localVideo.videoWidth}x${localVideo.videoHeight}`);
-  // We'll use the first onsize callback as an indication that video has started
-  // playing out.
-  if (startTime) {
-    const elapsedTime = window.performance.now() - startTime;
-    console.log(`Setup time: ${elapsedTime.toFixed(3)}ms`);
-    startTime = null;
-  }
-});
+// localVideo.addEventListener('resize', () => {
+//   console.log(`localVideo size changed to ${localVideo.videoWidth}x${localVideo.videoHeight}`);
+//   // We'll use the first onsize callback as an indication that video has started
+//   // playing out.
+//   if (startTime) {
+//     const elapsedTime = window.performance.now() - startTime;
+//     console.log(`Setup time: ${elapsedTime.toFixed(3)}ms`);
+//     startTime = null;
+//   }
+// });
 
 //////// telephone functions
 
@@ -90,25 +88,25 @@ function call() {
 }
 
 
-function upgrade() {
-  upgradeButton.disabled = true;
-  localVideo.style.display = '';
-  navigator.mediaDevices
-    .getUserMedia({video: true})
-    .then(stream => {
-      const videoTracks = stream.getVideoTracks();
-      if (videoTracks.length > 0) {
-        console.log(`Using video device: ${videoTracks[0].label}`);
-      }
-      localStream.addTrack(videoTracks[0]);
-      localVideo.srcObject = null;
-      localVideo.srcObject = localStream;
-      if (pc){
-        pc.addTrack(videoTracks[0], localStream);
-        return pc.createOffer(setLocalAndSendMessage, handleCreateOfferError);
-      }
-    })
-}
+// function upgrade() {
+//   //upgradeButton.disabled = true;
+//   localVideo.style.display = '';
+//   navigator.mediaDevices
+//     .getUserMedia({video: true})
+//     .then(stream => {
+//       const videoTracks = stream.getVideoTracks();
+//       if (videoTracks.length > 0) {
+//         console.log(`Using video device: ${videoTracks[0].label}`);
+//       }
+//       localStream.addTrack(videoTracks[0]);
+//       localVideo.srcObject = null;
+//       localVideo.srcObject = localStream;
+//       if (pc){
+//         pc.addTrack(videoTracks[0], localStream);
+//         return pc.createOffer(setLocalAndSendMessage, handleCreateOfferError);
+//       }
+//     })
+// }
 
 /////////////////////////////////////////////
 
@@ -137,8 +135,8 @@ function joinRoom(){
     dataChannelSend.placeholder = ''; 
     callButton.style.display = '';
     hangupButton.style.display = '';
-    upgradeButton.style.display = '';
-    upgradeButton.disabled = false;
+    //upgradeButton.style.display = '';
+    //upgradeButton.disabled = false;
 
     socket.emit('create or join', room);
     console.log('Attempted to create or  join room', room);
@@ -243,20 +241,15 @@ window.onbeforeunload = function() {
 
 function createPeerConnection() {
   try {
+    console.log('Create RTCPeerConnnection and send Data Channel');
     pc = new RTCPeerConnection(null);
     pc.onicecandidate = handleIceCandidate;
     pc.ontrack = gotRemoteStream;
     pc.onremovetrack = handleRemoteStreamRemoved;
-    console.log('Created RTCPeerConnnection');
-    
     sendChannel = pc.createDataChannel('sendDataChannel');
-    console.log('Created send data channel');
-
     sendChannel.onopen = onSendChannelStateChange;
     sendChannel.onclose = onSendChannelStateChange;
-  
     pc.ondatachannel = receiveChannelCallback;
-
     
   } catch (e) {
     console.log('Failed to create PeerConnection, exception: ' + e.message);
@@ -290,6 +283,10 @@ function doCall() {
 
 function doAnswer() {
   console.log('Sending answer to peer.');
+  
+  //upgradeButton.disabled = false;
+  hangupButton.disabled = false;
+
   pc.createAnswer().then(
     setLocalAndSendMessage,
     onCreateSessionDescriptionError
@@ -300,8 +297,6 @@ function setLocalAndSendMessage(sessionDescription) {
   pc.setLocalDescription(sessionDescription);
   console.log('setLocalAndSendMessage sending message', sessionDescription);
   sendMessage(sessionDescription);
-  upgradeButton.disabled = false;
-  hangupButton.disabled = false;
 }
 
 function onCreateSessionDescriptionError(error) {
@@ -311,23 +306,25 @@ function onCreateSessionDescriptionError(error) {
 
 function gotRemoteStream(e) {
   console.log('received remote stream');
-  remoteStream = e.stream;
+  remoteStream = e;
   sendReceive.style.display = '';
-  remoteVideo.style.display = '';
+  //remoteVideo.style.display = '';
   remoteAudio.style.display = '';
 
-  if (remoteVideo.srcObject !== e.streams[0]) {
-    remoteVideo.srcObject = e.streams[0];
+  //if (remoteVideo.srcObject !== e.streams[0]) {
+  //  remoteVideo.srcObject = e.streams[0];
     
-    const streamVisualizer = new StreamVisualizer(e.streams[0], remoteAudio);
-    streamVisualizer.start();
-  }
+  const streamVisualizer = new StreamVisualizer(e.streams[0], remoteAudio);
+  streamVisualizer.start();
+
+  //}
 }
 
 
 
 function handleRemoteStreamRemoved(event) {
-  remoteVideo.style.display = 'none';
+  remoteAudio.style.display = 'none';
+  //remoteVideo.style.display = 'none';
   console.log('Remote stream removed. Event: ', event);
 }
 
@@ -335,7 +332,7 @@ function hangup() {
   console.log('Hanging up.');
   stop();
   sendMessage('bye');
-  upgradeButton.disabled = true;
+  //upgradeButton.disabled = true;
   hangupButton.disabled = true;
 }
 
@@ -343,7 +340,7 @@ function handleRemoteHangup() {
   console.log('Session terminated.');
   stop();
   isInitiator = false;
-  upgradeButton.disabled = true;
+  //upgradeButton.disabled = true;
   hangupButton.disabled = true;
 }
 
