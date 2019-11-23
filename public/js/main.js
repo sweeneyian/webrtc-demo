@@ -1,9 +1,6 @@
 'use strict';
 
-// telephone variables
-
 const callButton = document.getElementById('callButton');
-//const upgradeButton = document.getElementById('upgradeButton');
 const hangupButton = document.getElementById('hangupButton');
 
 var roomInput = document.getElementById('roomInput');
@@ -12,19 +9,18 @@ var roomName = document.getElementById('roomName');
 
 callButton.disabled = true;
 hangupButton.disabled = true;
-//upgradeButton.disabled = true;
 callButton.onclick = call;
-//upgradeButton.onclick = upgrade;
 hangupButton.onclick = hangup;
 
 let startTime;
-//const localVideo = document.getElementById('localVideo');
 const localAudio = document.getElementById('localAudio');
-const remoteVideo = document.getElementById('remoteVideo');
+const localAudioCanvas = document.getElementById('localAudioCanvas');
 const remoteAudio = document.getElementById('remoteAudio');
+const remoteVideo = document.getElementById('remoteVideo');
+const remoteAudioCanvas = document.getElementById('remoteAudioCanvas');
 const sendReceive = document.getElementById('sendReceive');
-
-// Peer variables
+const localControls = document.getElementById('localControls');
+const remoteControls = document.getElementById('remoteControls');
 
 var isChannelReady = false;
 var isInitiator = false;
@@ -33,8 +29,6 @@ var localStream;
 var pc;
 var remoteStream;
 
-let localConnection;
-let remoteConnection;
 let sendChannel;
 let receiveChannel;
 const dataChannelSend = document.querySelector('textarea#dataChannelSend');
@@ -42,41 +36,28 @@ const dataChannelReceive = document.querySelector('textarea#dataChannelReceive')
 const sendButton = document.querySelector('button#sendButton');
 
 sendButton.onclick = sendData;
+var socket = io.connect();
+var room;
+
+var localAudioSlider = document.getElementById("localAudioSlider");
+var localAudioVolume = document.getElementById("localAudioVolume");
+localAudioVolume.innerHTML = localAudioSlider.value;
+localAudioSlider.oninput = function() {
+  localAudioVolume.innerHTML = this.value;
+  localAudio.volume = this.value/100;
+}
+
+var remoteAudioSlider = document.getElementById("remoteAudioSlider");
+var remoteAudioVolume = document.getElementById("remoteAudioVolume");
+remoteAudioVolume.innerHTML = remoteAudioSlider.value;
+remoteAudioSlider.oninput = function() {
+  remoteAudioVolume.innerHTML = this.value;
+  remoteAudio.volume = this.value/100;
+}
 
 
-//////// Audio Spectrogram Event Handling
+//////////////////////////
 
-remoteVideo.addEventListener('loadedmetadata', () => {
-  return console.log(`Remote video videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
-});
-
-remoteVideo.addEventListener('resize', () => {
-  console.log(`Remote video size changed to ${remoteVideo.videoWidth}x${remoteVideo.videoHeight}`);
-  // We'll use the first onsize callback as an indication that video has started
-  // playing out.
-  if (startTime) {
-    const elapsedTime = window.performance.now() - startTime;
-    console.log(`Setup time: ${elapsedTime.toFixed(3)}ms`);
-    startTime = null;
-  }
-});
-
-// localVideo.addEventListener('loadedmetadata', () => {
-//   return console.log(`localVideo  videoWidth: ${this.videoWidth}px,  videoHeight: ${this.videoHeight}px`);
-// });
-
-// localVideo.addEventListener('resize', () => {
-//   console.log(`localVideo size changed to ${localVideo.videoWidth}x${localVideo.videoHeight}`);
-//   // We'll use the first onsize callback as an indication that video has started
-//   // playing out.
-//   if (startTime) {
-//     const elapsedTime = window.performance.now() - startTime;
-//     console.log(`Setup time: ${elapsedTime.toFixed(3)}ms`);
-//     startTime = null;
-//   }
-// });
-
-//////// telephone functions
 
 function call() {
   startTime = window.performance.now();
@@ -87,32 +68,6 @@ function call() {
   maybeStart();
 }
 
-
-// function upgrade() {
-//   //upgradeButton.disabled = true;
-//   localVideo.style.display = '';
-//   navigator.mediaDevices
-//     .getUserMedia({video: true})
-//     .then(stream => {
-//       const videoTracks = stream.getVideoTracks();
-//       if (videoTracks.length > 0) {
-//         console.log(`Using video device: ${videoTracks[0].label}`);
-//       }
-//       localStream.addTrack(videoTracks[0]);
-//       localVideo.srcObject = null;
-//       localVideo.srcObject = localStream;
-//       if (pc){
-//         pc.addTrack(videoTracks[0], localStream);
-//         return pc.createOffer(setLocalAndSendMessage, handleCreateOfferError);
-//       }
-//     })
-// }
-
-/////////////////////////////////////////////
-
-var socket = io.connect();
-var room;
-
 function joinRoom(){
   // always get video audio 
   console.log('Requesting local stream');
@@ -122,21 +77,23 @@ function joinRoom(){
       audio: true,
       video: false
     })
-    .then(gotStream)
+    .then(gotStream) // gotStream stream => audio.srcObject = modifyGain(stream, 0.5)
     .catch(e => alert(`getUserMedia() error: ${e.name}`));
+
   room = roomName.value;
   console.log("Joining Room: " + room);
   roomInput.style.display = "none";
   localAudio.style.display = '';
+  localAudioCanvas.style.display = '';
+  localControls.style.display = '';
+
+
   roomDiv.innerHTML = "Welcome to <b>" + room + "</b> room" +"<br />";
 
   if (room !== '') {
-    
     dataChannelSend.placeholder = ''; 
     callButton.style.display = '';
     hangupButton.style.display = '';
-    //upgradeButton.style.display = '';
-    //upgradeButton.disabled = false;
 
     socket.emit('create or join', room);
     console.log('Attempted to create or  join room', room);
@@ -146,7 +103,6 @@ function joinRoom(){
 
 socket.on('created', function(room) {
   console.log('Created room ' + room);
-  //isInitiator = true; // call was initiated on joining room
 });
 
 socket.on('full', function(room) {
@@ -210,10 +166,12 @@ socket.on('message', function(message) {
 
 function gotStream(stream) {
   console.log('Adding local stream.');
+  console.log(stream);
+  localAudio.srcObject = stream;
   localStream = stream;
-  //localVideo.srcObject = stream;
+  localAudio.volume=0;
 
-  const streamVisualizer = new StreamVisualizer(stream, localAudio);
+  const streamVisualizer = new StreamVisualizer(stream, localAudioCanvas);
   streamVisualizer.start();
   if (isChannelReady){
     callButton.disabled = false;
@@ -222,17 +180,19 @@ function gotStream(stream) {
 
 function gotRemoteStream(e) {
   console.log('received remote stream');
+  console.log(e);
   remoteStream = e;
   sendReceive.style.display = '';
-  //remoteVideo.style.display = '';
   remoteAudio.style.display = '';
+  remoteAudioCanvas.style.display = '';
+  remoteControls.style.display = '';
 
-  if (remoteVideo.srcObject !== e.streams[0]) {
-    remoteVideo.srcObject = e.streams[0];
-    
-    const streamVisualizer = new StreamVisualizer(e.streams[0], remoteAudio);
-    streamVisualizer.start();
 
+    if (remoteAudio !== e.streams[0]) {
+      remoteAudio.srcObject = e.streams[0];
+      remoteAudio.volume =0.5;
+      const streamVisualizer = new StreamVisualizer(e.streams[0], remoteAudioCanvas);
+      streamVisualizer.start();
   }
 }
 
@@ -320,11 +280,6 @@ function onCreateSessionDescriptionError(error) {
   console.log('Failed to create session description: ' + error.toString());
 }
 
-
-
-
-
-
 function handleRemoteStreamRemoved(event) {
   remoteAudio.style.display = 'none';
   //remoteVideo.style.display = 'none';
@@ -335,7 +290,6 @@ function hangup() {
   console.log('Hanging up.');
   stop();
   sendMessage('bye');
-  //upgradeButton.disabled = true;
   hangupButton.disabled = true;
 }
 
@@ -343,7 +297,6 @@ function handleRemoteHangup() {
   console.log('Session terminated.');
   stop();
   isInitiator = false;
-  //upgradeButton.disabled = true;
   hangupButton.disabled = true;
 }
 
@@ -353,7 +306,6 @@ function stop() {
   pc = null;
 }
 
-
 function sendData() {
   const data = dataChannelSend.value;
   sendChannel.send(data);
@@ -362,6 +314,7 @@ function sendData() {
 
 function receiveChannelCallback(event) {
   console.log('Receive Channel Callback');
+  
   receiveChannel = event.channel;
   receiveChannel.onmessage = onReceiveMessageCallback;
   receiveChannel.onopen = onReceiveChannelStateChange;
@@ -370,6 +323,29 @@ function receiveChannelCallback(event) {
 
 function onReceiveMessageCallback(event) {
   console.log('Received Message');
+  var lowerCase = event.data.toLowerCase();
+  var lastRed = lowerCase.lastIndexOf("red");
+  var lastGreen = lowerCase.lastIndexOf("green");
+  var lastBlue = lowerCase.lastIndexOf("blue");
+  var maxIndex = Math.max(lastRed, lastGreen, lastBlue);
+
+  switch (maxIndex){
+    case -1:
+        document.body.style.backgroundColor = "#FFFFFF";
+      break;
+    case lastRed:
+        document.body.style.backgroundColor = "#FF0000";
+      break;
+    case lastGreen:
+        document.body.style.backgroundColor = "#00FF00";
+      break;
+    case lastBlue:
+        document.body.style.backgroundColor = "#0000FF";
+      break;
+    default: 
+      document.body.style.backgroundColor = "#000000";
+      break;
+  }
   dataChannelReceive.value = event.data;
 }
 
@@ -390,4 +366,3 @@ function onReceiveChannelStateChange() {
   const readyState = receiveChannel.readyState;
   console.log(`Receive channel state is: ${readyState}`);
 }
-

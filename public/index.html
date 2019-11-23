@@ -22,21 +22,28 @@
     <button onclick="joinRoom()">Join</button>
   </div>
 
-  <div>
-    <video id="remoteVideo" autoplay playsinline style="display: none;"></video>
+  <div class="grid-container">
+    <div class="item3">
+      <canvas id="localAudioCanvas" style="display: none;"></canvas>
+    </div>
+    <div class="item4" >
+      <canvas id="remoteAudioCanvas"  style="display: none;"></canvas>
+    </div>  
+    <div class="item1">
+      <div id="localControls" style="display: none;">
+        <audio id="localAudio" controls autoplay playsinline  ></audio><br>
+        <input type="range" min="0" max="100" value="0" class="slider" id="localAudioSlider"><br>
+        <p>Local volume: <span id="localAudioVolume"></span></p> <br>
+      </div>
+    </div>
+    <div> 
+      <div id="remoteControls" style="display: none;">
+        <audio id="remoteAudio" controls autoplay  playsinline ></audio> <br>
+        <input type="range" min="0" max="100" value="50" class="slider" id="remoteAudioSlider" ><br>
+        <p>Remote volume: <span id="remoteAudioVolume"></span></p> <br>
+      </div>
+    </div>
   </div>
-<div class="grid-container">
-  <!-- <div class="item1">
-    <video id="localVideo" autoplay playsinline muted style="display: none;"></video>
-  </div> -->
-  <div class="item3">
-    <canvas id="localAudio" style="display: none;"></canvas>
-  </div>
-  <div class="item4" >
-    <canvas id="remoteAudio" style="display: none;"></canvas>
-  </div>  
-</div>
-    
 
   
 

@@ -19,6 +19,8 @@
   "homepage": "https://github.com/sweeneyian/webrtc-demo#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "mediastream-gain": "^1.0.1",
+    "require": "^2.4.20",
     "socket.io": "^2.3.0"
   }
 }

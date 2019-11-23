@@ -37,6 +37,7 @@ io.sockets.on('connection', function(socket) {
     });
   
     socket.on('create or join', function(room) {
+      room = room.toUpperCase();
       log('Received request to create or join room ' + room);
   
       var clientsInRoom = io.sockets.adapter.rooms[room];
