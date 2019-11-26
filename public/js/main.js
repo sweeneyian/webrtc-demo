@@ -216,10 +216,15 @@ window.onbeforeunload = function() {
 
 /////////////////////////////////////////////////////////
 
+var configuration = { 
+  "iceServers": [{ "urls": ["stun:stun.1.google.com:19302"] }] 
+}; 
+
+
 function createPeerConnection() {
   try {
     console.log('Create RTCPeerConnnection and send Data Channel');
-    pc = new RTCPeerConnection(null);
+    pc = new RTCPeerConnection(configuration);
     pc.onicecandidate = handleIceCandidate;
     pc.ontrack = gotRemoteStream;
     pc.onremovetrack = handleRemoteStreamRemoved;
