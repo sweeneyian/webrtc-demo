@@ -68,10 +68,15 @@ function call () {
 function joinRoom () {
   // always get video audio
   console.log('Requesting local stream')
+  const audioDefaultConstraintString = {
+    sampleSize: 16,
+    channelCount: 2,
+    echoCancellation: true
+  }
 
   navigator.mediaDevices
     .getUserMedia({
-      audio: true,
+      audio: audioDefaultConstraintString,
       video: false
     })
     .then(gotStream) // gotStream stream => audio.srcObject = modifyGain(stream, 0.5)
