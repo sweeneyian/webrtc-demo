@@ -171,10 +171,6 @@ function gotStream (stream) {
   localStream = stream
   localAudio.volume = 0
 
-  // Add delay to sender
-  const [audioSender] = pc.getSenders()
-  audioSender.playoutDelayHint = 2
-
   const streamVisualizer = new StreamVisualizer(stream, localAudioCanvas)
   streamVisualizer.start()
   if (isChannelReady) {
@@ -191,8 +187,8 @@ function gotRemoteStream (e) {
   audioReceiver.playoutDelayHint = 2
 
   // Add additional 500 milliseconds of buffering.
-  //  const [audioSender] = pc.getSenders()
-  // audioSender.playoutDelayHint = 2
+  const [audioSender] = pc.getSenders()
+  audioSender.playoutDelayHint = 2
 
   remoteStream = e
   sendReceive.style.display = ''
