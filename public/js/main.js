@@ -225,7 +225,7 @@ function createPeerConnection () {
     pc.onicecandidate = handleIceCandidate
     pc.ontrack = gotRemoteStream
     pc.onremovetrack = handleRemoteStreamRemoved
-    // sendChannel = pc.createDataChannel('sendDataChannel')
+    sendChannel = pc.createDataChannel('sendDataChannel')
     sendChannel.onopen = onSendChannelStateChange
     sendChannel.onclose = onSendChannelStateChange
     pc.ondatachannel = receiveChannelCallback
