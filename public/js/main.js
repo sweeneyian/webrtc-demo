@@ -386,7 +386,7 @@ setInterval(() => {
         stats.forEach(element => {
           console.log(element)
           if (element.type === 'inbound-rtp') {
-            console.log('INBOUND-RTP estimatedPlayoutTimestamp :' + element.estimatedPlayoutTimestamp)
+            console.log('INBOUND-RTP lastPacketReceivedTimestamp :' + element.lastPacketReceivedTimestamp)
           }
         })
       })
