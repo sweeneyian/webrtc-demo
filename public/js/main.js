@@ -385,9 +385,9 @@ setInterval(() => {
       .then(function (stats) {
         stats.forEach(element => {
           console.log(element)
-          if (element.type === 'inbound-rtp') {
-            console.log('INBOUND-RTP lastPacketReceivedTimestamp :' + element.lastPacketReceivedTimestamp)
-          }
+          // if (element.type === 'inbound-rtp') {
+          //   console.log('INBOUND-RTP lastPacketReceivedTimestamp :' + element.lastPacketReceivedTimestamp)
+          // }
         })
       })
   } else {
