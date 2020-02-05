@@ -385,6 +385,9 @@ setInterval(() => {
       .then(function (stats) {
         stats.forEach(element => {
           console.log(element)
+          if (element.type === 'inbound-rtp') {
+            console.log('INBOUND-RTP estimatedPlayoutTimestamp :' + element.estimatedPlayoutTimestamp)
+          }
         })
       })
   } else {
