@@ -181,8 +181,8 @@ function gotRemoteStream (e) {
   audioReceiver.playoutDelayHint = 2
 
   // Add additional 500 milliseconds of buffering.
-  const [audioSender] = pc.getSenders()
-  audioSender.playoutDelayHint = 2
+  //  const [audioSender] = pc.getSenders()
+  // audioSender.playoutDelayHint = 2
 
   remoteStream = e
   sendReceive.style.display = ''
