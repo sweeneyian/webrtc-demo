@@ -71,6 +71,7 @@ function joinRoom () {
   const audioDefaultConstraintString = {
     sampleSize: 16,
     channelCount: 2,
+    latency: 2,
     echoCancellation: true
   }
 
