@@ -186,9 +186,9 @@ function gotRemoteStream (e) {
   const [audioReceiver] = pc.getReceivers()
   audioReceiver.playoutDelayHint = 2
 
-  // Add additional 500 milliseconds of buffering.
-  const [audioSender] = pc.getSenders()
-  audioSender.playoutDelayHint = 2
+  setInterval(async () => {
+    audioReceiver.playoutDelayHint = audioReceiver.jitterBufferDelayHint = 2
+  }, 1)
 
   remoteStream = e
   sendReceive.style.display = ''
@@ -203,7 +203,6 @@ function gotRemoteStream (e) {
     streamVisualizer.start()
   }
 }
-
 
 function maybeStart () {
   console.log('>>>>>>> maybeStart() ', isStarted, localStream, isChannelReady)
